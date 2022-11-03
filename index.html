@@ -1,0 +1,155 @@
+<html>
+  <head><title>Högsäter 3D</title>
+    <script src="./script/babylon.js"></script>
+    <script src="./script/babylon.gui.js"></script>
+    <script src="./script/babylonjs.loaders.min.js"></script>
+    <style>
+      body,#renderCanvas { width: 100%; height: 100%; margin:0; padding: 0; }
+    </style>
+  </head>
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+      const canvas = document.getElementById("renderCanvas");
+      const engine = new BABYLON.Engine(canvas, true);
+  
+      let scene, selected, yearSlider;
+      let selectedYear = new Date().getFullYear();
+
+      const createScene = function() {
+          scene = new BABYLON.Scene(engine);
+          scene.clearColor = new BABYLON.Color3.Black;
+
+          BABYLON.SceneLoader.Append("", "hogsater-3d.glb", scene, function (scene) {
+
+            //selected = scene.getMeshByName("FrejasVag8");
+            //selected = scene.meshes.find(v => v.name == "FrejasVag8");
+            // var found = scene.meshes.filter(v => v.name.indexOf("Frejas") >= 0);
+            // found[0].parent.metadata.gltf.extras.year
+
+            // selected = scene.getNodeByName("FrejasVag8")
+            // console.log("TEST - year: " + selected.metadata.gltf.extras.year);
+
+            return scene;
+          });
+
+
+
+          const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, .7, 0));
+
+
+          // Create slider for selecting year
+
+          var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+          advancedTexture.layer.layerMask = 2;
+          advancedTexture.idealWidth = document.body.clientWidth;
+          advancedTexture.renderAtIdealSize = true;
+
+          var panel = new BABYLON.GUI.StackPanel();
+          panel.width = "350px";  //((yearSlider.maximum - yearSlider.minimum) ) + "px";
+          panel.fontSize = "14px";
+          panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+          panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+          advancedTexture.addControl(panel);
+
+          yearSlider = new BABYLON.GUI.Slider();
+          yearSlider.maximum = new Date().getFullYear();
+          yearSlider.minimum = 1900;
+          yearSlider.height = "24px";
+          yearSlider.width = "100%";
+          yearSlider.color = "white";
+          yearSlider.background = "#333";
+          yearSlider.value = selectedYear;
+          yearSlider.onValueChangedObservable.add(function(value) {
+            if(!yearLabel) return;
+            selectedYear = value.toFixed(0);
+            yearLabel.text = "ÅR: " + selectedYear;
+
+            let meshCount = scene.meshes.length;
+            for(i=0;i < meshCount; i++) {
+              if(scene.meshes[i].parent) {
+                let m = scene.meshes[i].parent;
+                let year = helper.getNodeYear(m);
+                if(year) {
+                  scene.meshes[i].parent.setEnabled(year <= selectedYear);
+                  console.log(m.name + ": " + year);
+                }
+              }
+            }
+
+          });
+          panel.addControl(yearSlider);
+
+          let yearLabel = new BABYLON.GUI.TextBlock();
+          yearLabel.text = "ÅR: " + selectedYear;
+          yearLabel.height = "20px";
+          yearLabel.color = "white";
+          yearLabel.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+          yearLabel.marginTop = "10px";
+          panel.addControl(yearLabel); 
+
+          let tmp = {};
+          yearLabel.serialize(tmp);
+          let textOutput = BABYLON.GUI.TextBlock.Parse(tmp, null);
+          textOutput.text = "";
+          panel.addControl(textOutput);
+
+          //TODO: Height map
+          // CreateGroundFromHeightMap();
+
+          const alpha =  Math.PI/4;
+          const beta = Math.PI/3;
+          const radius = 700;
+          const target = new BABYLON.Vector3(0, 0, 0);
+          const camera = new BABYLON.ArcRotateCamera("Camera", alpha, beta, radius, target, scene);
+          camera.attachControl(canvas, true);
+
+          // camera.wheelDeltaPercentage = 0.01;
+
+          // camera.panningAxis = new BABYLON.Vector3(1, 1, 1);
+          // camera.setTarget(BABYLON.Vector3.Zero());
+          // camera.onViewMatrixChangedObservable.add(function(c) {
+          //     c.target.y = 0;    
+          // })          
+
+          // loop through scene.meshes and set isPickable = true 
+          // (? only for those with property metadata.gltf.extras.year ?) 
+
+          console.log("setting pickable..");
+          for(i=0;i < scene.meshes.length;i++) {
+            let node = scene.meshes[i].parent;
+            if(node) {
+              let year = helper.getNodeYear(node);
+              if(year) {
+                scene.meshes[i].isPickable = true;
+              }
+            }
+          }
+          console.log("pickables set.");
+          scene.onPointerDown = function (evt, pickResult) {
+            if (pickResult.hit) {
+              selected = pickResult.pickedMesh.parent;
+              console.log(selected.name + ": " + helper.getNodeYear(selected));
+              textOutput.text = selected.name + ": " + helper.getNodeYear(selected);
+            }
+          };
+ 
+          return scene;
+      }
+  
+      const sceneToRender = createScene();
+      engine.runRenderLoop(function () {
+        sceneToRender.render();
+      });
+
+      const helper = {
+        nodeHasYear: function(n) {
+          return n.metadata && n.metadata.gltf.extras && n.metadata.gltf.extras.year
+        },
+        getNodeYear: function(m) {
+          return helper.nodeHasYear(m) ? m.metadata.gltf.extras.year : null;
+        }
+      }
+    </script>
+  </body>
+</html>
