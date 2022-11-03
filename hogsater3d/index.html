@@ -22,17 +22,8 @@
 
           BABYLON.SceneLoader.Append("", "hogsater-3d.glb", scene, function (scene) {
 
-            //selected = scene.getMeshByName("FrejasVag8");
-            //selected = scene.meshes.find(v => v.name == "FrejasVag8");
-            // var found = scene.meshes.filter(v => v.name.indexOf("Frejas") >= 0);
-            // found[0].parent.metadata.gltf.extras.year
-
-            // selected = scene.getNodeByName("FrejasVag8")
-            // console.log("TEST - year: " + selected.metadata.gltf.extras.year);
-
             return scene;
           });
-
 
 
           const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, .7, 0));
@@ -72,7 +63,6 @@
                 let year = helper.getNodeYear(m);
                 if(year) {
                   scene.meshes[i].parent.setEnabled(year <= selectedYear);
-                  console.log(m.name + ": " + year);
                 }
               }
             }
@@ -104,18 +94,6 @@
           const camera = new BABYLON.ArcRotateCamera("Camera", alpha, beta, radius, target, scene);
           camera.attachControl(canvas, true);
 
-          // camera.wheelDeltaPercentage = 0.01;
-
-          // camera.panningAxis = new BABYLON.Vector3(1, 1, 1);
-          // camera.setTarget(BABYLON.Vector3.Zero());
-          // camera.onViewMatrixChangedObservable.add(function(c) {
-          //     c.target.y = 0;    
-          // })          
-
-          // loop through scene.meshes and set isPickable = true 
-          // (? only for those with property metadata.gltf.extras.year ?) 
-
-          console.log("setting pickable..");
           for(i=0;i < scene.meshes.length;i++) {
             let node = scene.meshes[i].parent;
             if(node) {
@@ -125,11 +103,9 @@
               }
             }
           }
-          console.log("pickables set.");
           scene.onPointerDown = function (evt, pickResult) {
             if (pickResult.hit) {
               selected = pickResult.pickedMesh.parent;
-              console.log(selected.name + ": " + helper.getNodeYear(selected));
               textOutput.text = selected.name + ": " + helper.getNodeYear(selected);
             }
           };
