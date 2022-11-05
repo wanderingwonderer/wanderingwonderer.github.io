@@ -13,7 +13,7 @@
       const canvas = document.getElementById("renderCanvas");
       const engine = new BABYLON.Engine(canvas, true);
   
-      let scene, selected, yearSlider;
+      let scene, yearSlider, selected, lastSelected;
       let selectedYear = new Date().getFullYear();
 
       const createScene = function() {
@@ -25,16 +25,12 @@
             return scene;
           });
 
-
           const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, .7, 0));
-
 
           // Create slider for selecting year
 
           var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
           advancedTexture.layer.layerMask = 2;
-          advancedTexture.idealWidth = document.body.clientWidth;
-          advancedTexture.renderAtIdealSize = true;
 
           var panel = new BABYLON.GUI.StackPanel();
           panel.width = "700px";  //((yearSlider.maximum - yearSlider.minimum) ) + "px";
@@ -94,19 +90,18 @@
           const camera = new BABYLON.ArcRotateCamera("Camera", alpha, beta, radius, target, scene);
           camera.attachControl(canvas, true);
 
-          for(i=0;i < scene.meshes.length;i++) {
-            let node = scene.meshes[i].parent;
-            if(node) {
-              let year = helper.getNodeYear(node);
-              if(year) {
-                scene.meshes[i].isPickable = true;
-              }
-            }
-          }
           scene.onPointerDown = function (evt, pickResult) {
             if (pickResult.hit) {
+              lastSelected = selected;
               selected = pickResult.pickedMesh.parent;
-              textOutput.text = selected.name + ": " + helper.getNodeYear(selected);
+              let year = helper.getNodeYear(selected);
+              if(lastSelected) {
+                lastSelected.getChildMeshes().forEach(m => m.renderOutline = false);
+              }
+              if(year > 1) {
+                selected.getChildMeshes().forEach(m => { m.outlineColor = BABYLON.Color3.Green(); m.outlineWidth=2; m.renderOutline = true});
+                textOutput.text = selected.name + ": " + helper.getNodeYear(selected);
+              }
             }
           };
  
