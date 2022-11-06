@@ -25,7 +25,7 @@
             return scene;
           });
 
-          const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, .7, 0));
+          const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, .7, 0), scene);
 
           // Create slider for selecting year
 
@@ -54,11 +54,11 @@
 
             let meshCount = scene.meshes.length;
             for(i=0;i < meshCount; i++) {
-              if(scene.meshes[i].parent) {
-                let m = scene.meshes[i].parent;
-                let year = helper.getNodeYear(m);
+              let node = scene.meshes[i].parent;
+              if(node) {
+                let year = helper.getNodeYear(node);
                 if(year) {
-                  scene.meshes[i].parent.setEnabled(year <= selectedYear);
+                  node.setEnabled(year <= selectedYear);
                 }
               }
             }
@@ -76,7 +76,7 @@
 
           let tmp = {};
           yearLabel.serialize(tmp);
-          let textOutput = BABYLON.GUI.TextBlock.Parse(tmp, null);
+          let textOutput = BABYLON.GUI.TextBlock.Parse(tmp, advancedTexture);
           textOutput.text = "";
           panel.addControl(textOutput);
 
@@ -104,7 +104,7 @@
               }
             }
           };
- 
+
           return scene;
       }
   
