@@ -4,13 +4,20 @@
     <script src="./script/babylon.gui.js"></script>
     <script src="./script/babylonjs.loaders.min.js"></script>
     <style>
-      body,#renderCanvas { width: 100%; height: 100%; margin:0; padding: 0; }
+      body,#renderCanvas { width: 100%; height: 100%; margin:0; padding: 0; overflow:hidden; user-select: none;} 
+      body,input { font-family: sans-serif; background-color: #000; color:bisque;}
     </style>
   </head>
   <body>
-    <canvas id="renderCanvas"></canvas>
+    <div style="z-index:2;position:absolute;top:30;left:5px;font-size:x-large;text-shadow: 0 0 5px #fee;">
+    <input id="yearBox" min-length="0" max-length="4" style="font-size:larger;border: 0 none;width:80px;" value="&nbsp;" />
+    <div id="textBox" style="font-size:large;padding-left:6px;">&nbsp;</div>
+    </div>
+      <canvas id="renderCanvas"></canvas>
     <script>
       const canvas = document.getElementById("renderCanvas");
+      const textBox = document.getElementById("textBox");
+      const yearBox = document.getElementById("yearBox");
       const engine = new BABYLON.Engine(canvas, true);
   
       let scene, yearSlider, selected, lastSelected;
@@ -46,12 +53,9 @@
           yearSlider.width = "100%";
           yearSlider.color = "white";
           yearSlider.background = "#333";
-          yearSlider.value = selectedYear;
           yearSlider.onValueChangedObservable.add(function(value) {
-            if(!yearLabel) return;
             selectedYear = value.toFixed(0);
-            yearLabel.text = "ÅR: " + selectedYear;
-
+            yearBox.value = selectedYear.toString();
             let meshCount = scene.meshes.length;
             for(i=0;i < meshCount; i++) {
               let node = scene.meshes[i].parent;
@@ -62,23 +66,9 @@
                 }
               }
             }
-
           });
+          yearSlider.value = selectedYear;
           panel.addControl(yearSlider);
-
-          let yearLabel = new BABYLON.GUI.TextBlock();
-          yearLabel.text = "ÅR: " + selectedYear;
-          yearLabel.height = "20px";
-          yearLabel.color = "white";
-          yearLabel.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-          yearLabel.marginTop = "10px";
-          panel.addControl(yearLabel); 
-
-          let tmp = {};
-          yearLabel.serialize(tmp);
-          let textOutput = BABYLON.GUI.TextBlock.Parse(tmp, advancedTexture);
-          textOutput.text = "";
-          panel.addControl(textOutput);
 
           //TODO: Height map
           // CreateGroundFromHeightMap();
@@ -100,7 +90,11 @@
               }
               if(year > 1) {
                 selected.getChildMeshes().forEach(m => { m.outlineColor = BABYLON.Color3.Green(); m.outlineWidth=2; m.renderOutline = true});
-                textOutput.text = selected.name + ": " + helper.getNodeYear(selected);
+                textBox.innerHTML = selected.name + ": " + helper.getNodeYear(selected);
+              }
+              else
+              {
+
               }
             }
           };
@@ -113,6 +107,15 @@
         sceneToRender.render();
       });
 
+      yearBox.onkeyup = function(e) {
+        if(this.value >= yearSlider.minimum && this.value <= yearSlider.maximum) {
+          selectedYear = this.value;
+          yearSlider.value=selectedYear;
+        }
+      }
+      yearBox.onchange = function(e) {
+        this.blur();
+      }
       const helper = {
         nodeHasYear: function(n) {
           return n.metadata && n.metadata.gltf.extras && n.metadata.gltf.extras.year
