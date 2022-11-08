@@ -7,13 +7,13 @@
       body,#renderCanvas { width: 100%; height: 100%; margin:0; padding: 0; overflow:hidden; user-select: none;} 
       body,input { font-family: sans-serif; background-color: #000; color:bisque;}
       #panel {z-index:2;position:absolute;top:30;left:5px;font-size:x-large;}
-      #yearBox {font-size:larger;border: 0 none;width:80px;text-shadow: 0 0 5px #fee;}
+      #yearBox {font-size:larger;border: 0 none;width:3em; text-align:center; text-shadow: 0 0 .25em #fee;}
       #textBox {font-size:large; text-shadow: 1px 1px #000; padding-left:6px;}
     </style>
   </head>
   <body>
     <div id="panel">
-    <input id="yearBox" min-length="0" max-length="4" value="&nbsp;" />
+    <input id="yearBox" minlength="2" maxlength="4" value="&nbsp;" />
     <div id="textBox">&nbsp;</div>
     </div>
       <canvas id="renderCanvas"></canvas>
@@ -43,7 +43,7 @@
           advancedTexture.layer.layerMask = 2;
 
           var panel = new BABYLON.GUI.StackPanel();
-          panel.width = "700px";  //((yearSlider.maximum - yearSlider.minimum) ) + "px";
+          panel.width = "700px";  //((yearSlider.maximum - yearSlider.minimum) * 5 ) + "px";
           panel.fontSize = "14px";
           panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
           panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
