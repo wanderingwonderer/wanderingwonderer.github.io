@@ -65,7 +65,6 @@
 
           BABYLON.SceneLoader.Append("", "hogsater-3d.glb", scene, function (scene) {
 
-            // scene.rootNodes[0].position = new BABYLON.Vector3(0,0,0);
             scene.rootNodes[0].rotationQuaternion = null;
             scene.rootNodes[0].rotation.y = Math.PI;
 
@@ -173,7 +172,6 @@
 
       window.onload = function(e) {
         document.getElementById("showGroundTexture").checked = false;
-        console.log("yeah?");
       }
       document.getElementById("showGroundTexture").onchange = function(e) {
         scene.getMeshById("ghm").visibility = this.checked;
